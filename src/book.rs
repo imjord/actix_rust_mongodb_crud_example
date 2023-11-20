@@ -1,21 +1,20 @@
 use serde::{Deserialize, Serialize};
-
+use mongodb::bson::doc;
 
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Book {
+    pub _id: mongodb::bson::oid::ObjectId,
     pub author: String,
     pub title: String,
     pub pages: u32,
+    
 }
 
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 
-impl Book {
-    pub fn new(author: String, title: String, pages: u32) -> Self {
-        Self {
-            author,
-            title,
-            pages
-        }
-    }
+pub struct BookContent {
+    pub author: String,
+    pub title: String,
+    pub pages: u32,
 }

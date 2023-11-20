@@ -5,12 +5,12 @@ use crate::{book::Book, DB_NAME, COLLECTION_NAME};
 // get all books from db
 
 use actix_web::{web, get, HttpResponse};
-use mongodb::{Client, Collection};
+use mongodb::{Client, Collection, bson::oid::ObjectId, bson::doc};
 use futures_util::stream::StreamExt;
 
 
-#[get("/api/book")]
-async fn get_users(client: web::Data<Client>) -> HttpResponse {
+#[get("/api/books")]
+async fn get_books(client: web::Data<Client>) -> HttpResponse {
 
     let collection: Collection<Book>  = client.database(DB_NAME).collection(COLLECTION_NAME);
 
@@ -36,5 +36,26 @@ async fn get_users(client: web::Data<Client>) -> HttpResponse {
         HttpResponse::NotFound().body("No books found")
     }
 
+
+}
+
+
+
+#[get("/api/books/{_id}")]
+async fn get_book(client: web::Data<Client>, _id: web::Path<String>) -> HttpResponse {
+
+    let _id = _id.into_inner();
+
+    let object_id = match ObjectId::parse_str(&_id) {
+        Ok(object_id) => object_id,
+        Err(_) => return HttpResponse::BadRequest().body("Invalid ID format specified"),
+    };
+
+    let collection: Collection<Book>  = client.database(DB_NAME).collection(COLLECTION_NAME);
+
+    match collection.find_one(doc! {"_id": object_id}, None).await {
+        Ok(book) => HttpResponse::Ok().json(book),
+        Err(_err) => HttpResponse::Ok().body(_err.to_string())
+    }
 
 }
